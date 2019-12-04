@@ -6,35 +6,45 @@
 # answer = Kernel.gets()
 # Kernel.puts(answer)
 
+require 'yaml'
+MESSAGES = YAML.load_file('calculator_messages.yml')
+puts MESSAGES.inspect
+
+def messages(message, lang='en')
+  MESSAGES[lang][message]
+end
+
 def prompt(message)
   Kernel.puts("=> #{message}")
 end
 
-def valid_number?(num)
-  num.to_i() != 0
+def valid_number?(input)
+  input.to_i.to_s == input || input.to_f.to_s == input
 end
 
 def operation_to_message(op)
-  case op
-  when '1'
-    'Adding' # note that you don't need to put the return here because the case is the only expresison in the method
-  when '2'
-    'Subtracting'
-  when '3'
-    'Multiplying'
-  when '4'
-    'Dividing'
-  end
+  word = case op
+          when '1'
+            'Adding' # note that you don't need to put the return here because the case is the only expresison in the method
+          when '2'
+            'Subtracting'
+          when '3'
+            'Multiplying'
+          when '4'
+            'Dividing'
+          end
+
+  word
 end
 
-prompt("Welcome to Calculator! Enter your name:")
+prompt(messages('welcome', 'en'))
 
 name = ''
 loop do
   name = Kernel.gets().chomp()
 
   if name.empty?()
-    prompt("Make sure to use a valid name")
+    prompt(MESSAGES['valid_name'])
   else
     break
   end
@@ -48,24 +58,24 @@ loop do # main loop
   operator = ''
 
   loop do
-    prompt("What's the first number?")
+    prompt(messages('first_number', 'en'))
     number1 = Kernel.gets().chomp() # .chomp() method ensures that the newline character is removed from the input string
 
     if valid_number?(number1)
       break
     else
-      prompt("Hmm... that doesn't look like a valid number")
+      prompt(messages('valid_number', 'en'))
     end
   end
 
   loop do
-    prompt("What's the second number?")
+    prompt(messages('second_number', ))
     number2 = Kernel.gets().chomp()
 
     if valid_number?(number2)
       break
     else
-      prompt("Hmm... that doesn't look like a valid number")
+      prompt(messages('valid_number', 'en'))
     end
   end
 
@@ -93,20 +103,20 @@ loop do # main loop
 
   result = case operator
            when '1'
-             number1.to_i() + number2.to_i()
+             number1.to_f() + number2.to_f()
            when '2'
-             number1.to_i() - number2.to_i()
+             number1.to_f() - number2.to_f()
            when '3'
-             number1.to_i() * number2.to_i()
+             number1.to_f() * number2.to_f()
            when '4'
              number1.to_f() / number2.to_f()
   end
 
   prompt("The result is #{result}")
 
-  prompt("Do you want to perofrm another calculation? (Y to calculate again)")
+  prompt(messages('another_calculation', 'en'))
   answer = Kernel.gets().chomp()
   break unless answer.downcase().start_with?('y')
 end
 
-prompt ("Thank you for using the calculator. Goodbye!")
+prompt (messages('goodbye', 'en'))
