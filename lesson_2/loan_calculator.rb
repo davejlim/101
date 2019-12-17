@@ -27,7 +27,6 @@ loop do
   loan_amount = ''
   apr = ''
   loan_duration_months = ''
-  monthly_payment = ''
 
   clear
 
@@ -79,14 +78,10 @@ loop do
   prompt(monthly_interest_rate)
 
   # monthly_payment_calculation(loan_amount.to_f, monthly_interest_rate.to_f, loan_duration_months.to_f)
-
-  monthly_payment =  loan_amount.to_f * (monthly_interest_rate.to_f / (1 - (1 + monthly_interest_rate.to_f)**(-loan_duration_months.to_f)))
+  monthly_payment = loan_amount.to_f * (monthly_interest_rate.to_f / (1 - (1 + monthly_interest_rate.to_f)**(-loan_duration_months.to_f)))
 
   prompt("Your monthly payment is $#{format('%02.2f', monthly_payment)}.")
 
-  # prompt("Would you like to calculate the monthly payment of another loan? Y/N")
-  # answer = gets.chomp
-  # break unless answer.chomp.downcase.start_with?("y")
   break unless another_calculation?
 end
 
