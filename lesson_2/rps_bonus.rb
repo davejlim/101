@@ -45,14 +45,13 @@ end
 loop do
   clear
   choice = ''
-  player_computer_score = [0, 0] #player score is first and computer score is second in array
-  prompt("Welcome to Rock Paper Scissors Spock Lizard! The grand winner is the first person to win 5 matches.")
-  
-  loop do
+  player_computer_score = [0, 0] # player score is first and computer score is second in array
+  prompt('Welcome to Rock Paper Scissors Spock Lizard! The grand winner is the first person to win 5 matches.')
 
+  loop do
     loop do
       prompt("To play, choose one: #{VALID_CHOICES.join(', ')}")
-      choice = Kernel.gets().chomp()
+      choice = Kernel.gets.chomp
 
       if VALID_CHOICES.include?(choice)
         break
@@ -75,14 +74,14 @@ loop do
   end
 
   if player_computer_score[0] == 5
-    prompt("Congratulations on being the grand winner of the game!")
+    prompt('Congratulations on being the grand winner of the game!')
   else
-    prompt("Defeat! Please try again.")
+    prompt('Defeat! Please try again.')
   end
 
-  prompt("Do you want to play again?")
-  answer = Kernel.gets().chomp()
-  break unless answer.downcase().start_with?('y')
+  prompt('Do you want to play again?')
+  answer = Kernel.gets.chomp
+  break unless answer.downcase.start_with?('y')
 end
 
-prompt("Thanks for playing. Goodbye!")
+prompt('Thanks for playing. Goodbye!')
