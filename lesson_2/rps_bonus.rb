@@ -1,5 +1,3 @@
-require 'pry'
-
 ABBREVS = { rock: 'r',
             paper: 'p',
             scissors: 's',
