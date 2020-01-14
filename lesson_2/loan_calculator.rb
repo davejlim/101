@@ -1,5 +1,3 @@
-require 'pry'
-
 def prompt(message)
   Kernel.puts("=> #{message}")
 end
