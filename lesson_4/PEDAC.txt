@@ -1,0 +1,53 @@
+# RB101  - Lesson 4 Ruby Collections - Introduction to PEDAC Process
+
+# PROBLEM:
+
+# Given a string, write a method `palindrome_substrings` which returns
+# all the substrings from a given string which are palindromes. Consider
+# palindrome words case sensitive.
+
+# Test cases:
+
+# palindrome_substrings("supercalifragilisticexpialidocious") == ["ili"]
+# palindrome_substrings("abcddcbA") == ["bcddcb", "cddc", "dd"]
+# palindrome_substrings("palindrome") == []
+# palindrome_substrings("") == []
+
+Questions:
+1. Are the only valid inputs strings?
+
+Inputs: strings
+Outputs: array of substrings
+
+Requirements:
+  - explicit:
+    - inputs are strings
+    - palindromes need to be case-sensitive
+  - implicit:
+    - give palindromes in an array
+    - empty strings should return an empty array
+    - if there are no palindromes, return an empty array
+
+Data Structure: Arrays because that is what the output is
+
+Algorithm:
+
+# substrings
+- initialize an empty array called substrings that will return all of the substrings of the string
+- intialize and assign start_idx as 0 for the starting character of the substring
+- intialize and assign end_idx as start_idx + 1
+- create a loop that will break when start_idx is equal to str.size
+  - create a loop that will break if end_idx is equal to str.size
+      - add substring with start_idx and end_idx to substrings array
+      - increment end_idx by 1
+  - end ending index loop
+  - increment start_idx by 1
+  - reassign end_idx to start_idx += 1
+- end start_idx loop
+- return substrings array
+
+# is_palindrome?(substrings)
+- create palindrome array
+- iterate through substrings to determine if it is the same as the reverse
+- if it is the same, add it to the palindrome array
+
