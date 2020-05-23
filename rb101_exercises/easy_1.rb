@@ -160,7 +160,26 @@ puts reverse_words('Launch School')         # => hcnuaL loohcS
 # I proceeded with an if statement inside of an #each method.
 # This could have been written more succinctly with the times method.
 
-def stringy(integer)
+# def stringy(integer)
+#   stringy_output = []
+
+#   integer.times do |index|
+#     number = index.even? ? 1 : 0
+#     stringy_output << number
+#   end
+
+#   stringy_output.join
+# end
+
+# puts stringy(6) == '101010'
+# puts stringy(9) == '101010101'
+# puts stringy(4) == '1010'
+# puts stringy(7) == '1010101'
+
+# Further Exploration - Modify stringy so it takes an additional optional argument that defaults to 1. 
+# If the method is called with this argument set to 0, the method should return a String of alternating 0s and 1s, but starting with 0 instead of 1.
+
+def stringy(integer=1)
   stringy_output = []
 
   integer.times do |index|
@@ -168,10 +187,87 @@ def stringy(integer)
     stringy_output << number
   end
 
+  stringy_output << integer if integer == 0
+
   stringy_output.join
 end
 
-puts stringy(6) == '101010'
-puts stringy(9) == '101010101'
-puts stringy(4) == '1010'
-puts stringy(7) == '1010101'
+# puts stringy() == '1'
+# puts stringy(9) == '101010101'
+# puts stringy(4) == '1010'
+# puts stringy(7) == '1010101'
+# puts stringy(0) == '0'
+
+
+# 8 - Write a method that takes one argument, an array containing integers, and returns the average of all numbers in the array. 
+# The array will never be empty and the numbers will always be positive integers.
+
+# Input: Array, never empty and positive integers
+# Output: Integer
+# Data Structure: Array
+
+# Requirements
+# - Return an an integer that is the average of all of the positive integers in the array
+
+# - create a method that takes one argument
+# - initialize a new variable to 0
+# - iterate through each element
+# - new variable adds up the elements of the array with each iteration
+# - divide the sum of the elements by the size of the array
+
+# def average(numbers)
+#   sum = 0
+  
+#   numbers.each do |int| # can also use the #reduce or #inject method which combines all elements of the given array by applying a binary operation
+#     sum = sum + int 
+#   end
+
+#   sum / numbers.size
+
+# end
+
+# def average(numbers)
+#   sum = numbers.inject(:+)
+#   sum / numbers.size
+# end
+
+# puts average([1.5, 5, 87, 45, 8, 8])
+# puts average([9.23, 47, 23, 95, 16, 52])
+
+# Further Exploration - When dividing numbers, sometimes the quotient isn't a whole number, 
+# therefore, it might make more sense to return a Float. Can you change the return value of average from an Integer to a Float?
+
+# 9 - Write a method that takes one argument, a positive integer, and returns the sum of its digits. 
+# For a challenge, try writing this without any basic looping constructs (while, until, loop, and each).
+
+# def sum(integer)
+#   list = integer.to_s.split(//)
+#   int_list = []
+
+#   for int in list
+#     int_list << int.to_i
+#   end
+
+#   sum = int_list.reduce { |sum, int| sum + int }
+
+# end
+
+# puts sum(23)
+# puts sum(496)
+# puts sum(123_456_789)
+
+# 10 - Write a method that takes two arguments, a positive integer and a boolean, and calculates the bonus for a given salary.
+# If the boolean is true, the bonus should be half of the salary. If the boolean is false, the bonus should be 0.
+
+def calculate_bonus(salary, bool)
+  bool == true ? salary / 2 : 0
+end
+
+puts calculate_bonus(2800, true) == 1400
+puts calculate_bonus(1000, false) == 0
+puts calculate_bonus(50000, true) == 25000
+
+# Can also shorten this since you are already having a boolean being passed as an argument
+
+def calculate_bonus(salary, bool)
+  bool ? salary / 2 : 0
