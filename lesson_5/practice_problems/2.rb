@@ -1,18 +1,24 @@
 #  RB101 - Lesson 5 - Practice Problems: Sorting, Nested Collections and Working with Blocks - 2
 
-# How would you order this array of number strings by descending numeric value?
+# How would you order this array of hashes based on the year of publication of each book, from the earliest to the latest?
 
-arr = ['10', '11', '9', '7', '8']
+books = [
+  {title: 'One Hundred Years of Solitude', author: 'Gabriel Garcia Marquez', published: '1967'},
+  {title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', published: '1925'},
+  {title: 'War and Peace', author: 'Leo Tolstoy', published: '1869'},
+  {title: 'Ulysses', author: 'James Joyce', published: '1922'}
+]
 
-int_arr = arr.map {|str| str.to_i}
+# Input - 3 Key/Value Paris in 4 Hash elemetns in an array
+# Output - same data structure but sorted from earliest to latest by the published year value
+# Data Structure - Array and Hash
 
-p int_arr.sort { |a, b| b <=> a }
+# - create map transformation to transform hash elements
+# - sort hash elements by ascending order by published year
 
-# Could have also made this condensed by 
-
-arr.sort do |a, b|
-  b.to_i <=> a.to_i
+books.sort_by do |book|
+  book[:published]
 end
-# => ["11", "10", "9", "8", "7"]
 
-# Since strings are compared character by character, '11' would be evaluated to be lesser than '7'. We would need to compare them numerically by converting them to integers.
+# sort_by allows us to access a particular value in each hash by which to sort, as long as those values have a <=> method
+# all the values for :publisehd are strings and are the same length so we can compare them without having to convert them to integers
