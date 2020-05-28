@@ -15,3 +15,29 @@ hsh = {
 
 # [["Red", "Green"], "MEDIUM", ["Red", "Green"], ["Orange"], "LARGE"]
 
+# Input - hash
+# Output - array
+# Data Structure - array
+
+# - initialize a new array
+  # - iterate through the values of hsh
+    # - access the :colors values
+      # - capitalize them
+      # - add them into the new array
+    # access teh :size values
+      # - upcase them
+      # - add them into the new array
+
+output_arr = []
+
+hsh.each do |produce, info|
+  if info[:type] == 'fruit'
+    output_arr << info[:colors].map do |color|
+      color.capitalize
+    end
+  else
+    output_arr << info[:size].upcase
+  end
+end
+
+p output_arr
