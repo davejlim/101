@@ -1,8 +1,12 @@
 #  RB101 - Lesson 5 - Practice Problems: Sorting, Nested Collections and Working with Blocks - 1
 
+require 'pry'
+require 'byebug'
+
 # How would you order this array of number strings by descending numeric value?
 
 arr = ['10', '11', '9', '7', '8']
+binding.pry
 
 int_arr = arr.map {|str| str.to_i}
 

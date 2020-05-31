@@ -1,6 +1,7 @@
 #  RB101 - Lesson 5 - Practice Problems: Sorting, Nested Collections and Working with Blocks - 14
 
 require 'pry'
+require 'pry-byebug'
 
 # Given this data structure write some code to return an array containing the colors of the fruits and the sizes of the vegetables. 
 # The sizes should be uppercase and the colors should be capitalized.
@@ -31,6 +32,7 @@ hsh = {
 output_arr = []
 
 hsh.each do |produce, info|
+  binding.pry
   if info[:type] == 'fruit'
     output_arr << info[:colors].map do |color|
       color.capitalize
