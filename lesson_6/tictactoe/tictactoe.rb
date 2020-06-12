@@ -1,6 +1,3 @@
-require 'pry'
-require 'pry-byebug'
-
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                 [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # columns
                 [[1, 5, 9], [3, 5, 7]]              # diagnols
@@ -10,7 +7,7 @@ PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
 WINNING_SCORE = 5
 FIRST_MOVE = 'choose'
-VALID_MOVE_CHOICES = ['player', 'computer']
+VALID_MOVE_CHOICES = ['player', 'computer', 'p', 'c']
 
 # rubocop:disable Metrics/LineLength
 
@@ -34,6 +31,7 @@ def display_board(brd, p_scr, c_scr, game_num)
   system 'clear'
   puts "You're #{PLAYER_MARKER}'s'. Computer's is #{COMPUTER_MARKER}'s."
   puts "The total score is - Player: #{p_scr}; Computer: #{c_scr}"
+  puts "The grand winner is the first to win #{WINNING_SCORE} games."
   puts "This is game number #{game_num}."
   puts ""
   puts "  1  |  2  |  3"
@@ -61,33 +59,44 @@ def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
 end
 
+def valid_integer?(num)
+  num.to_i.to_s == num
+end
+
+def center_placement(brd)
+  square = empty_squares(brd).sample
+  if brd[5] == INITIAL_MARKER
+    brd[5] = COMPUTER_MARKER
+  else
+    brd[square] = COMPUTER_MARKER
+  end
+end
+
+
 def player_places_piece!(brd)
   square = ''
 
   loop do
     prompt("Choose a square (#{joinor(empty_squares(brd))}):")
-    square = gets.chomp.to_i
-
-    break if empty_squares(brd).include?(square)
+    square = gets.chomp
+    break if empty_squares(brd).include?(square.to_i) && valid_integer?(square)
     prompt "Sorry, that's not a valid choice."
   end
 
-  brd[square] = PLAYER_MARKER
+  brd[square.to_i] = PLAYER_MARKER
 end
 
 def computer_places_piece!(brd)
-  square = empty_squares(brd).sample
+
   # offense
-  if immediate_win?(brd) == true
+  if immediate_win?(brd, COMPUTER_MARKER)
     computer_logic(brd, COMPUTER_MARKER)
   # defense
-  elsif immediate_threat?(brd) == true
+  elsif immediate_win?(brd, PLAYER_MARKER)
     computer_logic(brd, PLAYER_MARKER)
-  # random
-  elsif brd[5] == INITIAL_MARKER
-    brd[5] = COMPUTER_MARKER
+  # center or random
   else
-    brd[square] = COMPUTER_MARKER
+    center_placement(brd)
   end
 end
 
@@ -113,11 +122,15 @@ def board_full?(brd)
   empty_squares(brd).empty?
 end
 
+def whose_line?(brd, line, who)
+  brd.values_at(*line).count(who) == 3
+end
+
 def detect_winner(brd)
   WINNING_LINES.each do |line|
-    if brd.values_at(*line).count(PLAYER_MARKER) == 3
+    if whose_line?(brd, line, PLAYER_MARKER)
       return 'Player'
-    elsif brd.values_at(*line).count(COMPUTER_MARKER) == 3
+    elsif whose_line?(brd, line, COMPUTER_MARKER)
       return 'Computer'
     end
   end
@@ -129,19 +142,14 @@ def someone_won?(brd)
 end
 
 def game_over?(p_scr, c_scr)
-  p_scr == 5 || c_scr == 5
+  p_scr == WINNING_SCORE || c_scr == WINNING_SCORE
 end
 
-def immediate_threat?(brd)
+def immediate_win?(brd, who)
   WINNING_LINES.each do |line|
-    return true if brd.values_at(*line).count(PLAYER_MARKER) == 2 && brd.values_at(*line).count(INITIAL_MARKER) == 1
+    return true if brd.values_at(*line).count(who) == 2 && brd.values_at(*line).count(INITIAL_MARKER) == 1
   end
-end
-
-def immediate_win?(brd)
-  WINNING_LINES.each do |line|
-    return true if brd.values_at(*line).count(COMPUTER_MARKER) == 2 && brd.values_at(*line).count(INITIAL_MARKER) == 1
-  end
+  false
 end
 
 def computer_logic(brd, marker)
@@ -153,28 +161,63 @@ def computer_logic(brd, marker)
   end
 end
 
+def valid_answer?(ans)
+  answers = ['y', 'yes', 'n', 'no']
+  answers.include?(ans)
+end
+
+def keep_playing?
+  loop do
+    prompt("The grand winner is the first to win #{WINNING_SCORE} games. Would you like to play again?")
+    answer = gets.chomp
+    return answer if valid_answer?(answer)
+    prompt("Invalid choice!")
+  end
+end
+
+def retrieve_first_player
+  first_move = ''
+  system 'clear'
+  loop do
+    prompt("Choose who goes first: #{joinor(VALID_MOVE_CHOICES)}")
+    first_move = gets.chomp.downcase
+    break if VALID_MOVE_CHOICES.include?(first_move)
+    prompt("Invalid choice!")
+  end
+  first_move
+end
+
+def match_over?(p_scr, c_scr)
+  game_over?(p_scr, c_scr) || keep_playing?.start_with?('n')
+end
+
+def display_match_winner(p_scr, c_scr)
+  if match_won?(p_scr)
+    prompt("Congratulations! You have won with a grand total of #{p_scr} wins!")
+  elsif match_won?(c_scr)
+    prompt("Uh oh! Looks like Computer has won with a grand total of #{c_scr} wins.")
+  else
+    prompt("Thanks for playing Tic Tac Toe! Goodbye :)")
+  end
+end
+
+def match_won?(who)
+  who == WINNING_SCORE
+end
+
 player_score = 0
 computer_score = 0
 game_number = 1
-first_move = ''
 
 loop do
   board = initialize_board
 
-  if FIRST_MOVE == 'choose'
-    loop do
-      system 'clear'
-      prompt("Choose who goes first: #{joinor(VALID_MOVE_CHOICES)}")
-      first_move = gets.chomp.downcase
-      break if VALID_MOVE_CHOICES.include?(first_move)
-      prompt("Invalid choice!")
-    end
-  end
+  first_move = retrieve_first_player
 
   case first_move
-  when 'player'
+  when 'player', 'p'
     current_player = 'player'
-  when 'computer'
+  when 'computer', 'c'
     current_player = 'computer'
   end
 
@@ -202,23 +245,9 @@ loop do
 
   prompt("The total score is - Player: #{player_score}; Computer: #{computer_score}")
 
-  if game_over?(player_score, computer_score) == true
-    break
-  else
-    prompt("The grand winner is the first to win #{WINNING_SCORE} games. Would you like to play again?")
-    answer = gets.chomp
-    break unless answer.downcase.start_with?('y')
-  end
+  break if match_over?(player_score, computer_score)
 
   game_number += 1
-
-  break if player_score == WINNING_SCORE || computer_score == WINNING_SCORE
 end
 
-if player_score == WINNING_SCORE
-  prompt("Congratulations! You have won with a grand total of #{player_score} wins!")
-elsif computer_score == WINNING_SCORE
-  prompt("Uh oh! Looks like Computer has won with a grand total of #{computer_score} wins.")
-else
-  prompt("Thanks for playing Tic Tac Toe! Goodbye :)")
-end
+display_match_winner(player_score, computer_score)
