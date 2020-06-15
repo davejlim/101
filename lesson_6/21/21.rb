@@ -18,8 +18,7 @@ DECK = {'S' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'
         'D' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'],    # diamonds
         'C' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']}    # clubs
 
-VALUES = { 
-           '2' => 2,
+VALUES = { '2' => 2,
            '3' => 3,
            '4' => 4,
            '5' => 5,
@@ -32,7 +31,9 @@ VALUES = {
            'Q' => 10,       # queen
            'K' => 10,       # king
            'A' => 11,       # big ace
-           'a' => 1,        # little ace
+           'a' => 1 }        # little ace
+
+BLACKJACK = 21
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -54,6 +55,19 @@ def calculate_value(who)
   value = 0
   who.each { |card_value| value += VALUES[card_value[1]] }
   value
+end
+
+def bust?(who)
+  calculate_value(who) > BLACKJACK
+end
+
+def ace_conversion(who)
+  old_aces = who.select { |card| card[1] == 'A' }
+  old_aces.each do |card| 
+    card[1] = 'a' if card[1] == 'A'
+    break
+  end
+  old_aces
 end
 
 player_cards = []
