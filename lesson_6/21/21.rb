@@ -35,6 +35,10 @@ VALUES = { '2' => 2,
 
 BLACKJACK = 21
 
+VALID_CHOICES = ['hit', 'h', 'stay', 's']
+
+PLAY_AGAIN_CHOICES = ['yes', 'y', 'no', 'n']
+
 def prompt(msg)
   puts "=> #{msg}"
 end
@@ -61,8 +65,16 @@ def bust?(who)
   calculate_value(who) > BLACKJACK
 end
 
+def aces_select(who)
+  who.select { |card| card[1] == 'A' }
+end
+
+def aces?(who)
+  !aces_select(who).empty?
+end
+
 def ace_conversion(who)
-  old_aces = who.select { |card| card[1] == 'A' }
+  old_aces = aces_select(who)
   old_aces.each do |card| 
     card[1] = 'a' if card[1] == 'A'
     break
@@ -70,30 +82,123 @@ def ace_conversion(who)
   old_aces
 end
 
-player_cards = []
-dealer_cards = []
-player_value = 0
-dealer_value = 0
-
-2.times do
-  deal_card(player_cards)
-  deal_card(dealer_cards)
-end
-
-p player_cards
-p dealer_cards
-
-loop do
-  prompt "Would you like to hit or stay?"
-  choice = gets.chomp.downcase
-
-  case choice
-  when 'hit'
-    deal_card(player_cards)
-    p player_cards
-  when 'stay'
-    break
+def turn_logic(who, name)
+  loop do
+    if bust?(who) && aces?(who)
+      ace_conversion(who)
+    elsif bust?(who)
+      prompt("#{name} cards are: #{who}.")
+      prompt("#{name} total is #{calculate_value(who)}.")
+      prompt("#{name} card values are greater than 21 and busted!")
+      return 'busted'
+    else
+      prompt("#{name} cards are: #{who}.")
+      prompt("#{name} total is #{calculate_value(who)}.")
+      return calculate_value(who)
+    end
   end
 end
 
-p player_value = calculate_value(player_cards)
+def player_choice
+  loop do
+    prompt "Would you like to hit or stay?"
+    choice = gets.chomp.downcase
+    return choice if VALID_CHOICES.include?(choice)
+    prompt "Uh oh! That was an invalid selection!"
+  end
+end
+
+def player_turn(who)
+  loop do
+    return 'busted' if bust?(who)
+    case player_choice
+    when 'hit', 'h'
+      deal_card(who)
+      turn_logic(who, 'Your')
+    when 'stay', 's'
+      turn_logic(who, 'Your')
+      break
+    end
+  end
+end
+
+def dealer_turn(who)
+  loop do
+    return 'busted' if bust?(who)
+    prompt("Dealer's cards are: #{who}.")
+    break if calculate_value(who) > 17
+    deal_card(who)
+    prompt "Dealer hits!"
+    turn_logic(who, "Dealer's")
+  end
+end
+
+def total_msg(plr, dlr)
+  prompt("Your cards totaled #{calculate_value(plr)} compared to the dealer's #{calculate_value(dlr)}.")
+end
+
+def compare_values(plr, dlr, wnr)
+  if wnr == 'player'
+    prompt("Congratulations! You beat the dealer!")
+  elsif wnr == 'dealer'
+    prompt("Oh no! The dealer beat you!")
+  elsif calculate_value(plr) > calculate_value(dlr)
+    prompt("Congratulations! You beat the dealer!")
+    total_msg(plr, dlr)
+  elsif calculate_value(dlr) > calculate_value(plr)
+    prompt("Oh no! The dealer beat you!")
+    total_msg(plr, dlr)
+  else
+    prompt("You tied with the dealer!")
+  end
+end
+
+def play_again?
+  loop do
+    prompt "Would you like to play again?"
+    answer = gets.chomp.downcase
+    return answer if PLAY_AGAIN_CHOICES.include?(answer)
+    prompt "Uh oh! That's not a valid response!"
+  end
+end
+
+loop do
+  system 'clear'
+
+  player_cards = []
+  dealer_cards = []
+  player_value = 0
+  dealer_value = 0
+  winner = ''
+
+  prompt "Welcome to Blackjack!"
+  prompt "Try to beat the dealer, but make sure you don't go above 21 and bust."
+
+  2.times do
+    deal_card(player_cards)
+    deal_card(dealer_cards)
+  end
+  
+  puts "Your cards are #{player_cards}."
+  puts "Dealer has #{dealer_cards[0]} and an unknown card."
+
+  loop do
+    if player_turn(player_cards) == 'busted'
+      winner = 'dealer'
+      compare_values(player_cards, dealer_cards, winner)
+    elsif dealer_turn(dealer_cards) == 'busted'
+      winner = 'player'
+      compare_values(player_cards, dealer_cards, winner)
+    else
+      compare_values(player_cards, dealer_cards, winner)
+    end
+    break
+  end
+
+  # compare_values(player_cards, dealer_cards, winner)
+
+  break if play_again?.start_with?('n')
+
+end
+
+prompt "Thanks for playing!"
