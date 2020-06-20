@@ -3,20 +3,17 @@
 require 'pry'
 require 'pry-byebug'
 
-# 1. Initialize deck
-# 2. Deal cards to player and dealer
-# 3. Player turn: hit or stay
-#   - repeat until bust or "stay"
-# 4. If player bust, dealer wins.
-# 5. Dealer turn: hit or stay
-#   - repeat until total >= 17
-# 6. If dealer bust, player wins.
-# 7. Compare cards and declare winner.
+# rubocop: disable LineLength
+DECK = { 'S' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'], # spades
+         'H' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'],  # hearts
+         'D' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'],  # diamonds
+         'C' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'] } # clubs
+# rubocop: enable LineLength
 
-DECK = {'S' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'],    # spades
-        'H' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'],    # hearts
-        'D' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'],    # diamonds
-        'C' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']}    # clubs
+SUITS = { 'S' => 'Spades', # spades
+          'H' => 'Hearts',  # hearts
+          'D' => 'Diamonds',  # diamonds
+          'C' => 'Clubs' } # clubs
 
 VALUES = { '2' => 2,
            '3' => 3,
@@ -31,9 +28,10 @@ VALUES = { '2' => 2,
            'Q' => 10,       # queen
            'K' => 10,       # king
            'A' => 11,       # big ace
-           'a' => 1 }        # little ace
+           'a' => 1 }       # little ace
 
 BLACKJACK = 21
+DEALER_STAYS = 17
 
 VALID_CHOICES = ['hit', 'h', 'stay', 's']
 
@@ -43,16 +41,36 @@ def prompt(msg)
   puts "=> #{msg}"
 end
 
-def choose_card
-  card = []
-  suit = DECK.keys.sample
-  value = DECK[suit].sample
-  DECK[suit].slice!(DECK[suit].index(value))
-  card = [suit, value]
+def choose_card(dck)
+  loop do
+    suit = dck.keys.sample
+    value = dck[suit].sample
+    if dck[suit].size > 0
+      dck[suit].slice!(dck[suit].index(value)) 
+      return [suit, value]
+    end
+  end
 end
 
-def deal_card(who)
-  who << choose_card
+def deal_card(who, dck)
+  who << choose_card(dck)
+end
+
+def joinand(arr, sep = ', ', wrd = 'and ')
+  n = arr.size - 1
+  new_str = arr.slice(0, n).join(sep) + sep + wrd + arr.last
+end
+
+def translate_cards(who)
+  translated = []
+  if who.flatten.size > 2
+    who.each do |card|
+      translated << "#{card[1]} of #{SUITS[card[0]]}"
+    end
+    return joinand(translated) if who.flatten.size > 2
+  else
+    "#{who[1]} of #{SUITS[who[0]]}"
+  end
 end
 
 def calculate_value(who)
@@ -75,11 +93,20 @@ end
 
 def ace_conversion(who)
   old_aces = aces_select(who)
-  old_aces.each do |card| 
+  old_aces.each do |card|
     card[1] = 'a' if card[1] == 'A'
     break
   end
   old_aces
+end
+
+def display_cards(who, name)
+  puts "#{name} cards are: #{translate_cards(who)}."
+  puts "#{name} total is #{calculate_value(who)}."
+end
+
+def aces_bust(who)
+  ace_conversion(who) if bust?(who) && aces?(who)
 end
 
 def turn_logic(who, name)
@@ -87,13 +114,11 @@ def turn_logic(who, name)
     if bust?(who) && aces?(who)
       ace_conversion(who)
     elsif bust?(who)
-      prompt("#{name} cards are: #{who}.")
-      prompt("#{name} total is #{calculate_value(who)}.")
-      prompt("#{name} card values are greater than 21 and busted!")
+      display_cards(who, name)
+      puts "#{name} card values are greater than 21 and busted!"
       return 'busted'
     else
-      prompt("#{name} cards are: #{who}.")
-      prompt("#{name} total is #{calculate_value(who)}.")
+      display_cards(who, name)
       return calculate_value(who)
     end
   end
@@ -101,19 +126,20 @@ end
 
 def player_choice
   loop do
-    prompt "Would you like to hit or stay?"
+    prompt "Would you like to (h)it or (s)tay?"
     choice = gets.chomp.downcase
     return choice if VALID_CHOICES.include?(choice)
-    prompt "Uh oh! That was an invalid selection!"
+    puts 'Uh oh! That was an invalid selection!'
   end
 end
 
-def player_turn(who)
+def player_turn(who, dck)
   loop do
+    aces_bust(who)
     return 'busted' if bust?(who)
     case player_choice
     when 'hit', 'h'
-      deal_card(who)
+      deal_card(who, dck)
       turn_logic(who, 'Your')
     when 'stay', 's'
       turn_logic(who, 'Your')
@@ -122,34 +148,38 @@ def player_turn(who)
   end
 end
 
-def dealer_turn(who)
+def dealer_turn(who, dck)
   loop do
     return 'busted' if bust?(who)
-    prompt("Dealer's cards are: #{who}.")
-    break if calculate_value(who) > 17
-    deal_card(who)
-    prompt "Dealer hits!"
+    break if calculate_value(who) >= DEALER_STAYS
+    puts "Dealer's cards are: #{translate_cards(who)}."
+    deal_card(who, dck)
+    puts "Dealer hits!"
     turn_logic(who, "Dealer's")
   end
 end
 
+# rubocop: disable LineLength
 def total_msg(plr, dlr)
-  prompt("Your cards totaled #{calculate_value(plr)} compared to the dealer's #{calculate_value(dlr)}.")
+  puts "Your cards totaled #{calculate_value(plr)} compared to the dealer's #{calculate_value(dlr)}."
 end
+# rubocop: enable LineLength
 
 def compare_values(plr, dlr, wnr)
   if wnr == 'player'
-    prompt("Congratulations! You beat the dealer!")
+    puts "Congratulations! You beat the dealer!"
+    'player'
   elsif wnr == 'dealer'
-    prompt("Oh no! The dealer beat you!")
+    puts "Oh no! The dealer beat you!"
+    'dealer'
   elsif calculate_value(plr) > calculate_value(dlr)
-    prompt("Congratulations! You beat the dealer!")
-    total_msg(plr, dlr)
+    puts "Congratulations! You beat the dealer!"
+    'player'
   elsif calculate_value(dlr) > calculate_value(plr)
-    prompt("Oh no! The dealer beat you!")
-    total_msg(plr, dlr)
+    puts "Oh no! The dealer beat you!"
+    'dealer'
   else
-    prompt("You tied with the dealer!")
+    puts "You tied with the dealer!"
   end
 end
 
@@ -158,47 +188,96 @@ def play_again?
     prompt "Would you like to play again?"
     answer = gets.chomp.downcase
     return answer if PLAY_AGAIN_CHOICES.include?(answer)
-    prompt "Uh oh! That's not a valid response!"
+    puts "Uh oh! That's not a valid response!"
   end
+end
+
+def match_score(pscr, dscr)
+  puts "Player Wins: #{pscr}; Dealer Wins: #{dscr}"
+end
+
+def next_round
+  loop do
+    prompt "Hit Enter when you're ready for the next round!"
+    return 'play' if gets == "\n"
+    prompt "Uh oh! You didn't hit Enter. Do you want to play the next round?"
+    answer = gets.chomp.downcase
+    return answer if PLAY_AGAIN_CHOICES.include?(answer)
+    puts "Uh oh! That's not a valid response!"
+  end
+end
+
+def end_message(pscr, dscr)
+  puts
+  puts "-----------------------------"
+  puts "Match is Over!"
+  match_score(pscr, dscr)
+  puts "-----------------------------"
+  puts
 end
 
 loop do
-  system 'clear'
-
-  player_cards = []
-  dealer_cards = []
-  player_value = 0
-  dealer_value = 0
-  winner = ''
-
-  prompt "Welcome to Blackjack!"
-  prompt "Try to beat the dealer, but make sure you don't go above 21 and bust."
-
-  2.times do
-    deal_card(player_cards)
-    deal_card(dealer_cards)
-  end
-  
-  puts "Your cards are #{player_cards}."
-  puts "Dealer has #{dealer_cards[0]} and an unknown card."
+  player_score = 0
+  dealer_score = 0
 
   loop do
-    if player_turn(player_cards) == 'busted'
-      winner = 'dealer'
-      compare_values(player_cards, dealer_cards, winner)
-    elsif dealer_turn(dealer_cards) == 'busted'
-      winner = 'player'
-      compare_values(player_cards, dealer_cards, winner)
-    else
-      compare_values(player_cards, dealer_cards, winner)
+    system 'clear'
+
+    new_deck = DECK.dup
+    player_cards = []
+    dealer_cards = []
+    winner = ''
+
+    puts "Welcome to Blackjack!"
+    puts "Try to beat the dealer, but make sure you don't go above 21 and bust."
+    puts "First person to win 5 games, wins the match!"
+    match_score(player_score, dealer_score)
+
+    2.times do
+      deal_card(player_cards, new_deck)
+      deal_card(dealer_cards, new_deck)
     end
-    break
+
+    puts "Your cards are #{translate_cards(player_cards)}."
+    puts "Dealer has #{translate_cards(dealer_cards[0])} and an unknown card."
+
+    if player_turn(player_cards, new_deck) == 'busted'
+      winner = 'dealer'
+    elsif dealer_turn(dealer_cards, new_deck) == 'busted'
+      winner = 'player'
+    end
+
+    total_msg(player_cards, dealer_cards)
+
+    case compare_values(player_cards, dealer_cards, winner)
+    when 'player'
+      player_score += 1
+    when 'dealer'
+      dealer_score += 1
+    end
+
+    match_score(player_score, dealer_score)
+
+    break if player_score >= 5 || dealer_score >= 5
+
+    case next_round
+    when 'play'
+      next
+    when 'y', 'yes'
+      next
+    when 'n', 'no'
+      break
+    end
   end
 
-  # compare_values(player_cards, dealer_cards, winner)
+  end_message(player_score, dealer_score)
+
+  if player_score == 5
+    puts "Congratulations on beating the house!"
+  elsif dealer_score == 5
+    puts "The house always wins! Try again next time."
+  end
 
   break if play_again?.start_with?('n')
-
 end
-
-prompt "Thanks for playing!"
+puts "Thanks for playing!"
