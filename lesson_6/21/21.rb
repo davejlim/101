@@ -1,8 +1,5 @@
 # RB101 - Lesson 6 Slightly Larger Problems - Assignment: Twenty-One
 
-require 'pry'
-require 'pry-byebug'
-
 # rubocop: disable LineLength
 DECK = { 'S' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'], # spades
          'H' => ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'],  # hearts
