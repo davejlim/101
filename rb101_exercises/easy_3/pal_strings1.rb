@@ -26,9 +26,30 @@ def palindrome?(str)
   true
 end
 
+def real_palindrome?(str)
+  str.downcase!
+  str.gsub!(/\W/, '')
+  start = 0
+  ending = -1
+  loop do
+    return false unless str[start] == str[ending]
+    start += 1
+    ending -= 1
+    break if start == str.size
+  end
+  true
+end
+
 puts palindrome?('madam') == true
 puts palindrome?('Madam') == false          # (case matters)
 puts palindrome?("madam i'm adam") == false # (all characters matter)
 puts palindrome?('356653') == true
 puts palindrome?([1, 2, 3, 2, 1]) == true
 puts palindrome?([2, 4, 5, 6, 7]) == false
+
+puts real_palindrome?('madam') == true
+puts real_palindrome?('Madam') == true           # (case does not matter)
+puts real_palindrome?("Madam, I'm Adam") == true # (only alphanumerics matter)
+puts real_palindrome?('356653') == true
+puts real_palindrome?('356a653') == true
+puts real_palindrome?('123ab321') == false
