@@ -28,9 +28,19 @@ def xor(first, second)
   end
 end
 
-puts xor(true, false) == true
-puts xor(false, true) == true
-puts xor(true, true) == false
-puts xor(false, false) == false
+#def xor?(first, second)
+#  return true if first && !second
+#  return true if !first && second
+#  false
+#end
+
+def xor?(first, second)
+  (first && !second) || (!first && second)
+end
+
+puts xor?(true, false) == true
+puts xor?(false, true) == true
+puts xor?(true, true) == false
+puts xor?(false, false) == false
 
 
