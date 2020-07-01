@@ -27,3 +27,16 @@ puts multisum(3) == 3
 puts multisum(5) == 8
 puts multisum(10) == 33
 puts multisum(1000) == 234168
+
+# Could also have used the select method
+
+def multisum2(int)
+  multiples = (1..int).select { |num| (num % 3 == 0) || (num % 5 == 0) }
+  multiples.inject(:+)
+end
+
+
+puts multisum2(3) == 3
+puts multisum2(5) == 8
+puts multisum2(10) == 33
+puts multisum2(1000) == 234168
