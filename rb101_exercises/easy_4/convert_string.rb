@@ -31,3 +31,32 @@ end
 puts string_to_integer('4321') == 4321
 puts string_to_integer('570') == 570
 
+# Write a method that takes a String of digits, and returns the appropriate
+# number as an integer. The String may have a leading + or - sign; if the
+# first character is a +, your method should return a positive number; if it
+# is a -, your method should return a negative number. If no sign is given,
+# you should return a positive number.
+
+# You may assume the string will always contain a valid number.
+
+def string_to_signed_integer(str)
+  if str[0] == '+' || str[0] == '-'
+    sign = str.slice!(0)
+  end
+
+  integer =  string_to_integer(str)
+
+  case sign
+  when "+", nil
+    integer
+  when "-"
+    (0 - integer)
+  end
+end
+
+puts string_to_signed_integer('4321')
+puts string_to_signed_integer('-570')
+puts string_to_signed_integer('+100')
+puts string_to_signed_integer('4321') == 4321
+puts string_to_signed_integer('-570') == -570
+puts string_to_signed_integer('+100') == 100
