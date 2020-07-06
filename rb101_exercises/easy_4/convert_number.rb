@@ -26,3 +26,25 @@ p integer_to_string(5000)
 puts integer_to_string(4321) == '4321'
 puts integer_to_string(0) == '0'
 puts integer_to_string(5000) == '5000'
+
+# In the previous exercise, you developed a method that converts non-negative
+# numbers to strings. In this exercise, you're going to extend that method by
+# adding the ability to represent negative numbers as well.
+
+def signed_integer_to_string(int)
+  num_string = integer_to_string(int.abs)
+  if int < 0
+    num_string.prepend('-')
+  elsif int == 0
+    num_string
+  else
+    num_string.prepend('+')
+  end
+end
+
+puts signed_integer_to_string(4321)
+puts signed_integer_to_string(-123)
+puts signed_integer_to_string(0)
+puts signed_integer_to_string(4321) == '+4321'
+puts signed_integer_to_string(-123) == '-123'
+puts signed_integer_to_string(0) == '0'
