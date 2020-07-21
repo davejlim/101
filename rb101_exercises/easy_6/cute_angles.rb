@@ -31,3 +31,17 @@ puts dms(254.6) == %(254°36'00")
 puts dms(93.034773) == %(93°02'05")
 puts dms(0) == %(0°00'00")
 puts dms(360) == %(360°00'00") || dms(360) == %(0°00'00")
+
+def dms_further(num)
+  total_seconds = (num % 360) * SECONDS_IN_DEGREE
+  degrees, remaining_seconds = total_seconds.divmod(SECONDS_IN_DEGREE)
+  minutes, seconds = remaining_seconds.divmod(SECONDS_IN_MINUTE)
+ "#{degrees}#{DEGREE}#{format('%02d', minutes)}\'#{format('%02d', seconds)}\""
+end
+
+puts dms_further(400)
+puts dms_further(-40)
+puts dms_further(-420)
+puts dms_further(400) == %(40°00'00")
+puts dms_further(-40) == %(320°00'00")
+puts dms_further(-420) == %(300°00'00")
